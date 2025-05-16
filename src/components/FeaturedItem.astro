@@ -1,0 +1,46 @@
+---
+import { type FeaturedItem } from '../types';
+import Button from './Button.astro';
+import CustomImage from './CustomImage.astro';
+import Markdown from './Markdown.astro';
+
+interface Props extends FeaturedItem {
+    background?: 'light' | 'primary' | 'transparent';
+    'data-sb-field-path'?: string;
+}
+
+const { heading, body, cta, image, background = 'transparent', 'data-sb-field-path': fieldPath } = Astro.props;
+
+const btnClassMap = {
+    transparent: 'btn-primary',
+    light: 'btn-primary',
+    primary: 'btn-outline btn-accent'
+};
+---
+
+<div class="border-2 border-current border-dashed card card-compact" data-sb-field-path={fieldPath}>
+    <div class="card-body gap-4">
+        {
+            image?.src && (
+                <figure class="w-full aspect-[4/3] relative">
+                    <CustomImage _id={image._id} src={image.src} alt={image.alt} width={600} height={450} class="w-full h-full object-cover rounded" />
+                </figure>
+            )
+        }
+        {
+            heading && (
+                <h3 class="card-title" data-sb-field-path=".heading">
+                    {heading}
+                </h3>
+            )
+        }
+        {body && <Markdown content={body} data-sb-field-path=".body" />}
+        {
+            cta && (
+                <div class="card-actions">
+                    <Button {...cta} class:list={['btn btn-sm', btnClassMap[background]]} data-sb-field-path=".cta" />
+                </div>
+            )
+        }
+    </div>
+</div>
