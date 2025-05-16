@@ -1,0 +1,105 @@
+ <!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terra Touch</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(#1a0033, #000);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    .label {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.5rem;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="label">Terra Touch: Доторкнись до кольору</div>
+  <canvas id="globeCanvas"></canvas>  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('globeCanvas'), antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const material = new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/World_map_blank_without_borders.svg/1920px-World_map_blank_without_borders.svg.png'),
+      color: 0xffffff,
+      metalness: 0.1,
+      roughness: 0.9
+    });
+    const sphere = new THREE.Mesh(geometry, material);
+    scene.add(sphere);
+
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    camera.position.z = 5;
+
+    let isDragging = false;
+    let previousMousePosition = {
+      x: 0,
+      y: 0
+    };
+
+    renderer.domElement.addEventListener('mousedown', function (e) {
+      isDragging = true;
+    });
+
+    renderer.domElement.addEventListener('mousemove', function (e) {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.offsetX - previousMousePosition.x,
+          y: e.offsetY - previousMousePosition.y
+        };
+
+        const deltaRotationQuaternion = new THREE.Quaternion()
+          .setFromEuler(new THREE.Euler(
+            toRadians(deltaMove.y * 0.5),
+            toRadians(deltaMove.x * 0.5),
+            0,
+            'XYZ'
+          ));
+
+        sphere.quaternion.multiplyQuaternions(deltaRotationQuaternion, sphere.quaternion);
+      }
+
+      previousMousePosition = {
+        x: e.offsetX,
+        y: e.offsetY
+      };
+    });
+
+    document.addEventListener('mouseup', function (e) {
+      isDragging = false;
+    });
+
+    function toRadians(angle) {
+      return angle * (Math.PI / 180);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script></body>
+</html>
