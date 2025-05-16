@@ -1,0 +1,41 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Layout from './../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import FeaturedItems from './../components/FeaturedItems.astro';
+import Quote from './../components/Quote.astro';
+
+export async function getStaticPaths() {
+    const pages = await getCollection('pages');
+    return pages.map((page) => {
+        return {
+            params: { slug: page.slug },
+            props: { page }
+        };
+    });
+}
+
+type Props = { page: CollectionEntry<'pages'> };
+
+const { page } = Astro.props;
+const { title, sections } = page.data;
+
+const componentMap = {
+    featuredItems: FeaturedItems,
+    hero: Hero,
+    quote: Quote
+};
+---
+
+<Layout title={title}>
+    <div class="flex flex-col w-full gap-16 sm:gap-24" data-sb-object-id={['src/content/pages/', page.id].join('')}>
+        {
+            sections?.length &&
+                sections.map((section, idx) => {
+                    const Component = componentMap[section.type];
+                    return <Component {...section} data-sb-field-path={`sections.${idx}`} />;
+                })
+        }
+    </div>
+    <script is:inline src="/preview-update.js"></script>
+</Layout>
