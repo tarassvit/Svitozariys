@@ -1,0 +1,60 @@
+---
+import { type Post } from '../../types';
+import Layout from '../../layouts/Layout.astro';
+import CustomImage from '../../components/CustomImage.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Markdown from '../../components/Markdown.astro';
+import { fetchData, getPostById } from '../../data/post';
+
+export async function getStaticPaths() {
+    const data = await fetchData();
+    return data.map((post: Post) => {
+        if (!post._id) return;
+        const slug = post.slug.current;
+        return {
+            params: { slug },
+            props: { id: post._id }
+        };
+    });
+}
+
+const { id } = Astro.props;
+const post: Post = await getPostById(id);
+const { _id, title, publishDate, author, image, body } = post || {};
+---
+
+<Layout title={title}>
+    <article data-sb-object-id={_id} class="p-4 bg-white rounded text-neutral-900 md:p-12">
+        {
+            image?.src && (
+                <figure class="w-full aspect-[4/3] relative mb-10 rounded-lg overflow-hidden">
+                    <CustomImage _id={image._id} src={image.src} alt={image.alt} width={1024} height={768} class="object-cover w-full h-full" />
+                </figure>
+            )
+        }
+        <header class="mb-12 text-center">
+            <h1 data-sb-field-path="title">{title}</h1>
+            <p class="mt-6 text-sm">
+                {
+                    publishDate && (
+                        <span>
+                            Published on <FormattedDate dateString={publishDate} class="italic" data-sb-field-path="publishDate" />
+                        </span>
+                    )
+                }
+                {
+                    author?.name && (
+                        <span>
+                            by{' '}
+                            <span class="italic" data-sb-field-path="author.name">
+                                {author.name}
+                            </span>
+                        </span>
+                    )
+                }
+            </p>
+        </header>
+        {body && <Markdown content={body} class="mx-auto mb-10 text-lg max-w-prose" data-sb-field-path="body" />}
+    </article>
+    <script is:inline src="/preview-update.js"></script>
+</Layout>

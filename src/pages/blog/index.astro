@@ -1,0 +1,18 @@
+---
+import { type Post } from '../../types';
+import Layout from '../../layouts/Layout.astro';
+import PostPreview from '../../components/PostPreview.astro';
+import { fetchData } from '../../data/post';
+
+const posts: Post[] = await fetchData();
+---
+
+<Layout title="Blog">
+    <div class="flex flex-col gap-12 sm:gap-16">
+        <header>
+            <h1>Blog</h1>
+        </header>
+        {posts.map((post) => <PostPreview {...post} />)}
+    </div>
+    <script is:inline src="/preview-update.js"></script>
+</Layout>

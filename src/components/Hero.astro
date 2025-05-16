@@ -1,0 +1,55 @@
+---
+import { type Hero } from '../types';
+import Button from './Button.astro';
+import CustomImage from './CustomImage.astro';
+import Markdown from './Markdown.astro';
+import Section from './Section.astro';
+
+interface Props extends Hero {
+    'data-sb-field-path'?: string;
+}
+
+const { heading, body, image, cta, layout, ...rest } = Astro.props;
+
+const layoutClassMap = {
+    imgLeft: 'md:flex-row-reverse',
+    imgRight: 'md:flex-row'
+};
+
+const btnClassMap = {
+    transparent: 'btn-primary',
+    light: 'btn-primary',
+    primary: 'btn-outline btn-accent'
+};
+---
+
+<Section {...rest}>
+    <div class:list={['flex flex-col gap-12 md:items-center', layoutClassMap[layout] ?? layoutClassMap['imgRight']]}>
+        <div class="flex-1 w-full max-w-xl mx-auto space-y-6">
+            {
+                heading && (
+                    <h1 class="text-3xl font-bold sm:text-4xl" data-sb-field-path=".heading">
+                        {heading}
+                    </h1>
+                )
+            }
+            {body && <Markdown content={body} class="sm:text-lg" data-sb-field-path=".body" />}
+            {
+                cta && (
+                    <Button
+                        {...cta}
+                        class:list={['btn sm:btn-lg sm:btn-wide', btnClassMap[Astro.props.background] ?? btnClassMap['transparent']]}
+                        data-sb-field-path=".cta"
+                    />
+                )
+            }
+        </div>
+        {
+            image?.src && (
+                <div class="w-full aspect-[4/3] flex-1 relative overflow-hidden rounded-lg">
+                    <CustomImage _id={image._id} src={image.src} alt={image.alt} width={640} height={480} class="w-full h-full object-cover" />
+                </div>
+            )
+        }
+    </div>
+</Section>

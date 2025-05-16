@@ -1,0 +1,43 @@
+---
+import { type Page } from '../types';
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import FeaturedItems from '../components/FeaturedItems.astro';
+import Quote from '../components/Quote.astro';
+import { fetchData, getPageById } from '../data/page';
+
+export async function getStaticPaths() {
+    const data = await fetchData();
+    return data.map((page: Page) => {
+        const slug = page.slug.current === '/' ? undefined : page.slug.current;
+        return {
+            params: { slug },
+            props: { id: page._id }
+        };
+    });
+}
+
+const { id } = Astro.props;
+const page: Page = await getPageById(id);
+const { _id, title, sections } = page || {};
+
+const componentMap = {
+    featuredItems: FeaturedItems,
+    hero: Hero,
+    quote: Quote
+};
+---
+
+{
+    page && (
+        <Layout title={title}>
+            <div class="flex flex-col w-full gap-16 sm:gap-24" data-sb-object-id={_id}>
+                {sections?.length &&
+                    sections.map((section, idx) => {
+                        const Component = componentMap[section._type];
+                        return <Component {...section} data-sb-field-path={`sections.${idx}`} />;
+                    })}
+            </div>
+        </Layout>
+    )
+}

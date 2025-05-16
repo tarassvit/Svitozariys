@@ -1,0 +1,51 @@
+---
+import { type Quote } from '../types';
+import CustomImage from './CustomImage.astro';
+import Section from './Section.astro';
+
+interface Props extends Quote {
+    'data-sb-field-path'?: string;
+}
+
+const { quote, author, ...rest } = Astro.props;
+---
+
+<Section {...rest}>
+    <blockquote class="flex flex-col items-center gap-8">
+        <p class="text-xl text-center sm:text-2xl max-w-[45ch]" data-sb-field-path=".quote">
+            {quote}
+        </p>
+        {
+            author && (
+                <footer class="flex items-center gap-4" data-sb-field-path=".author">
+                    {author.image?.src && (
+                        <div class="w-16 sm:w-24 shrink-0 aspect-square">
+                            <CustomImage
+                                _id={author.image._id}
+                                src={author.image.src}
+                                width={80}
+                                height={80}
+                                alt={author.image.alt}
+                                class="object-cover w-full h-full rounded-full"
+                            />
+                        </div>
+                    )}
+                    {(author.name || author.title) && (
+                        <div class={author.image?.src ? 'text-left' : 'text-center'}>
+                            {author.name && (
+                                <p class="sm:text-lg" data-sb-field-path=".name">
+                                    {author.name}
+                                </p>
+                            )}
+                            {author.title && (
+                                <p class="text-sm sm:text-base" data-sb-field-path=".title">
+                                    {author.title}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </footer>
+            )
+        }
+    </blockquote>
+</Section>
